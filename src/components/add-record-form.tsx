@@ -1,50 +1,59 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Textarea } from "@/components/ui/textarea"
-import { AudioRecorder } from "./audio-recorder"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { AudioRecorder } from "./audio-recorder";
 
 export function AddRecordForm() {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null)
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
-  const [transcription, setTranscription] = useState("")
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [transcription, setTranscription] = useState("");
 
   const handlePrescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setPrescriptionFile(e.target.files[0])
+      setPrescriptionFile(e.target.files[0]);
     }
-  }
+  };
 
   const handleAudioRecorded = (blob: Blob) => {
-    setAudioBlob(blob)
-    // In a real app, you would send this blob to a transcription service
-    setTranscription("This is where the transcription would appear...")
-  }
+    setAudioBlob(blob);
+  };
+
+  const handleTranscriptionComplete = (text: string) => {
+    setTranscription(text);
+    toast.success("Your audio has been successfully transcribed.");
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
-    // Here you would normally send the form data to your API
-    // const formData = new FormData(e.currentTarget)
-    // const response = await fetch('/api/records', { method: 'POST', body: formData })
+    try {
+      const formData = new FormData(e.currentTarget);
+      if (audioBlob) {
+        formData.append("audioFile", audioBlob);
+      }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    setIsSubmitting(false)
-    router.push("/")
-  }
+      toast.success("The patient record has been successfully saved.");
+      router.push("/");
+    } catch (error) {
+      console.error("Error saving record:", error);
+      toast.error("Failed to save the record. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -114,32 +123,29 @@ export function AddRecordForm() {
 
           <div className="space-y-2">
             <Label>Voice Notes</Label>
-            <AudioRecorder onRecordingComplete={handleAudioRecorded} />
+            <AudioRecorder
+              onRecordingComplete={handleAudioRecorded}
+              onTranscriptionComplete={handleTranscriptionComplete}
+            />
 
-            {audioBlob && (
-              <div className="mt-4 space-y-2">
-                <Label htmlFor="transcription">Transcription</Label>
-                <Textarea
-                  id="transcription"
-                  name="transcription"
-                  value={transcription}
-                  onChange={(e) => setTranscription(e.target.value)}
-                  className="min-h-[100px]"
-                />
-              </div>
-            )}
+            <div className="mt-4 space-y-2">
+              <Label htmlFor="transcription">Transcription</Label>
+              <Textarea
+                id="transcription"
+                name="transcription"
+                value={transcription}
+                onChange={(e) => setTranscription(e.target.value)}
+                placeholder="Record audio to get transcription..."
+                className="min-h-[100px]"
+              />
+            </div>
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline" type="button" onClick={() => router.push("/")}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save Record"}
-          </Button>
+          <Button variant="outline" type="button" onClick={() => router.push("/")}>Cancel</Button>
+          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Saving..." : "Save Record"}</Button>
         </CardFooter>
       </Card>
     </form>
-  )
+  );
 }
-
