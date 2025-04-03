@@ -3,7 +3,7 @@
 import { type ReactNode, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Stethoscope, ClipboardList, Users, Calendar, Settings, Menu, X, LogOut, Home } from "lucide-react"
+import { Stethoscope, ClipboardList, Users, Calendar, Settings, Menu, LogOut, Home, Folder, FolderPlusIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -12,6 +12,28 @@ interface DashboardLayoutProps {
   children: ReactNode
 }
 
+const navigationType = {
+  patient: [
+    { name: "Dashboard", href: `/dashboard/patient`, icon: Home },
+    { name: "Pending Records", href: "/dashboard/patient/pending", icon: ClipboardList },
+    { name: "Appointments", href: `/dashboard/patient/appointments`, icon: Calendar },
+    { name: "Settings", href: `/dashboard/patient/settings`, icon: Settings },
+  ],
+  doctor: [
+    { name: "Dashboard", href: `/dashboard/doctor`, icon: Home },
+    { name: "Patient Search", href: `/dashboard/doctor/patients`, icon: Users },
+    { name: "Create Record", href: `/dashboard/doctor/create`, icon: FolderPlusIcon },
+    { name: "Reports", href: `/dashboard/doctor/reports`, icon: Folder },
+    { name: "Settings", href: `/dashboard/doctor/settings`, icon: Settings },
+  ],
+  admin: [
+    { name: "Dashboard", href: `/dashboard/admin`, icon: Home },
+    { name: "Manage Users", href: `/dashboard/admin/users`, icon: Users },
+    { name: "Reports", href: `/dashboard/admin/reports`, icon: ClipboardList },
+    { name: "Settings", href: `/dashboard/admin/settings`, icon: Settings },
+  ],
+};
+
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
@@ -19,13 +41,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   // Extract role from pathname
   const role = pathname.split("/")[2] as "doctor" | "patient" | "admin"
 
-  const navigation = [
-    { name: "Dashboard", href: `/dashboard/${role}`, icon: Home },
-    { name: "Medical Records", href: `/dashboard/${role}/records`, icon: ClipboardList },
-    { name: "Patients", href: `/dashboard/${role}/patients`, icon: Users },
-    { name: "Appointments", href: `/dashboard/${role}/appointments`, icon: Calendar },
-    { name: "Settings", href: `/dashboard/${role}/settings`, icon: Settings },
-  ]
+  const navigation = navigationType[role]
 
   return (
     <div className="flex h-screen bg-gray-50">

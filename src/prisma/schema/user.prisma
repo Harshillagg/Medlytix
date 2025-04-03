@@ -1,0 +1,15 @@
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  medicalRecords MedicalRecord[] @relation("PatientMedicalRecords")
+  doctorRecords  MedicalRecord[] @relation("DoctorMedicalRecords") // records made by doctor if user is doctor
+
+  patientTimelines PatientTimeline[] @relation("PatientTimelines")
+  doctorTimelines  PatientTimeline[] @relation("DoctorTimelines")
+}

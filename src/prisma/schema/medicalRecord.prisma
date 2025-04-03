@@ -1,0 +1,23 @@
+type Medication {
+  name         String
+  dosage       String // eg. "500mg"
+  quantity     Int
+  instructions String?
+}
+
+model MedicalRecord {
+  id                  String       @id @default(auto()) @map("_id") @db.ObjectId
+  patientId           String       @db.ObjectId
+  doctorId            String       @db.ObjectId
+  diagnosis           String
+  prescription        String // General prescription notes/overview
+  medications         Medication[] // Detailed medication information
+  specialInstructions String?
+  isAcceptedStatus    String       @default("pending") // "pending", "accepted", "rejected"
+  notes               String? // Doctor's additional notes
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  patient User @relation("PatientMedicalRecords", fields: [patientId], references: [id])
+  doctor  User @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
+}

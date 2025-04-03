@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["prismaSchemaFolder"]
 }
 
@@ -14,36 +14,6 @@ enum Role {
   ADMIN
 }
 
-model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  medicalRecords   MedicalRecord[] @relation("PatientMedicalRecords")
-  doctorRecords    MedicalRecord[] @relation("DoctorMedicalRecords")
-
-  patientTimelines PatientTimeline[] @relation("PatientTimelines")
-  doctorTimelines  PatientTimeline[] @relation("DoctorTimelines")
-}
-
-model MedicalRecord {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId
-  doctorId    String?  @db.ObjectId
-  diagnosis   String
-  prescription String
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user   User @relation("PatientMedicalRecords", fields: [userId], references: [id])
-  doctor User? @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
-}
-
 model PatientTimeline {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @db.ObjectId
@@ -53,6 +23,6 @@ model PatientTimeline {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user   User @relation("PatientTimelines", fields: [userId], references: [id])
+  user   User  @relation("PatientTimelines", fields: [userId], references: [id])
   doctor User? @relation("DoctorTimelines", fields: [doctorId], references: [id])
 }
