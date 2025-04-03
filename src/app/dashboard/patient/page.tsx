@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 // const MOCK_PATIENT_ID = "1"
 
@@ -21,7 +23,9 @@ export default async function PatientDashboard() {
         <h1 className="text-2xl font-bold tracking-tight">Patient Dashboard</h1>
         <p className="text-muted-foreground">View your medical records and history</p>
       </div>
-
+      <Button asChild>
+          <Link href="/dashboard/patient/add-record">Add New Record</Link>
+      </Button>
       <Card>
         <CardHeader>
           <CardTitle>Your Medical Records</CardTitle>
