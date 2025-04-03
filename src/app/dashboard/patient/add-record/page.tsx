@@ -11,7 +11,7 @@ export default function AddRecordPage() {
           <p className="text-muted-foreground">Enter patient information and medical details</p>
         </div>
         <Button variant="outline" asChild>
-          <Link href="/">Back to Dashboard</Link>
+          <Link href="/dashboard/patient">Back to Dashboard</Link>
         </Button>
       </div>
 

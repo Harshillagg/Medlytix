@@ -5,17 +5,16 @@ import { ApiResponse } from '@/utils/ApiResponse';
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { recordId, status } = body;
+    const { recordId, isAcceptedStatus } = body;
 
-    if (!recordId || !status) return ApiResponse(false, "Record Id and Status is required", 404)
+    if (!recordId || !isAcceptedStatus) return ApiResponse(false, "Record Id and Status is required", 404)
 
-    // Update the record status
     const updatedRecord = await prisma.medicalRecord.update({
       where: {
         id: recordId,
       },
       data: {
-        isAcceptedStatus: status,
+        isAcceptedStatus : isAcceptedStatus
       },
     });
 
