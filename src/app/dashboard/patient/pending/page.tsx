@@ -4,10 +4,10 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2, Check, X } from "lucide-react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { format } from "date-fns"
 import axios from "axios"
 import { toast } from "react-hot-toast"
+import RecordDetailsModal from "@/components/RecordDetailsModal"
 
 interface Doctor {
   id: string
@@ -86,14 +86,14 @@ export default function PendingRecordsPage() {
       
       setRecords(prev => prev.filter(record => record.id !== recordId))
 
-      toast.success(`You have successfully ${status} the medical record.`)
+      toast.success(`You have successfully ${isAcceptedStatus} the medical record.`)
       
       if (modalOpen && selectedRecord?.id === recordId) {
         setModalOpen(false)
       }
       
     } catch (error) {
-      console.error(`Error ${status} record:`, error)
+      console.error(`Error updating record:`, error)
       toast.error("Failed to update the record. Please try again.")
     } finally {
       setUpdatingStatus(null)
@@ -175,93 +175,7 @@ export default function PendingRecordsPage() {
       </Card>
 
       {/* Record details modal */}
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        {selectedRecord && (
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{selectedRecord.diagnosis}</DialogTitle>
-              <DialogDescription>
-                Created on {format(new Date(selectedRecord.createdAt), "MMMM d, yyyy")}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-6 py-4">
-              <div>
-                <h3 className="text-lg font-medium">Doctor</h3>
-                <p>{selectedRecord.doctor.name} ({selectedRecord.doctor.email})</p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium">Diagnosis</h3>
-                <p>{selectedRecord.diagnosis}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium">Prescription</h3>
-                <p>{selectedRecord.prescription}</p>
-              </div>
-              
-              {selectedRecord.medications.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium">Medications</h3>
-                  <div className="space-y-2 mt-2">
-                    {selectedRecord.medications.map((medication, index) => (
-                      <div key={index} className="p-3 border rounded-md">
-                        <div className="font-medium">{medication.name} - {medication.dosage}</div>
-                        <div>Quantity: {medication.quantity}</div>
-                        {medication.instructions && <div>Instructions: {medication.instructions}</div>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {selectedRecord.specialInstructions && (
-                <div>
-                  <h3 className="text-lg font-medium">Special Instructions</h3>
-                  <p>{selectedRecord.specialInstructions}</p>
-                </div>
-              )}
-              
-              {selectedRecord.notes && (
-                <div>
-                  <h3 className="text-lg font-medium">Doctor's Notes</h3>
-                  <p>{selectedRecord.notes}</p>
-                </div>
-              )}
-              
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <Button 
-                  variant="outline" 
-                  className="flex items-center"
-                  onClick={() => handleStatusUpdate(selectedRecord.id, 'accepted')}
-                  disabled={updatingStatus === selectedRecord.id}
-                >
-                  {updatingStatus === selectedRecord.id ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Check className="h-4 w-4 mr-2" />
-                  )}
-                  Accept Record
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="flex items-center text-destructive hover:text-destructive"
-                  onClick={() => handleStatusUpdate(selectedRecord.id, 'rejected')}
-                  disabled={updatingStatus === selectedRecord.id}
-                >
-                  {updatingStatus === selectedRecord.id ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <X className="h-4 w-4 mr-2" />
-                  )}
-                  Reject Record
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
+      <RecordDetailsModal selectedRecord={selectedRecord} modalOpen={modalOpen} setModalOpen={setModalOpen}/>
     </div>
   )
 }

@@ -21,7 +21,7 @@ const navigationType = {
   ],
   doctor: [
     { name: "Dashboard", href: `/dashboard/doctor`, icon: Home },
-    { name: "Patient Search", href: `/dashboard/doctor/patients`, icon: Users },
+    { name: "Patient Search", href: `/dashboard/doctor/patient-search`, icon: Users },
     { name: "Create Record", href: `/dashboard/doctor/create`, icon: FolderPlusIcon },
     { name: "Reports", href: `/dashboard/doctor/reports`, icon: Folder },
     { name: "Settings", href: `/dashboard/doctor/settings`, icon: Settings },

@@ -1,6 +1,3 @@
-import { PatientSearch } from "@/components/PatientSearch"
-import { MedicalRecordForm } from "@/components/MedicalRecordForm"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, Users, ClipboardList, Calendar } from "lucide-react"
 
@@ -55,19 +52,6 @@ export default function DoctorDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      <Tabs defaultValue="search" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="search">Patient Search</TabsTrigger>
-          <TabsTrigger value="create">Create Medical Record</TabsTrigger>
-        </TabsList>
-        <TabsContent value="search" className="space-y-4">
-          <PatientSearch />
-        </TabsContent>
-        <TabsContent value="create" className="space-y-4">
-          <MedicalRecordForm />
-        </TabsContent>
-      </Tabs>
     </div>
   )
 }
