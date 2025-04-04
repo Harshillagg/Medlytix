@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get("role") as Role;
 
     if (!userId || !role)
-      return ApiResponse(false, "User Id and role is required", 404);
+      return ApiResponse(false, "User Id and role is required", 500);
 
     const user = await prisma.user.findFirst({
       where: {

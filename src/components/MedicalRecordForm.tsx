@@ -1,129 +1,128 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useTransition } from "react"
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// import { useToast } from "@/components/ui/use-toast"
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import axios from "axios";
+import { Role } from "@prisma/client";
+import toast from "react-hot-toast";
 
 type Patient = {
-  id: string
-  name: string
-  email: string
-}
+  id: string;
+  name: string;
+  email: string;
+};
 
-export function MedicalRecordForm() {
-//   const { toast } = useToast()
-  const [patientSearchQuery, setPatientSearchQuery] = useState("")
-  const [patientSearchResults, setPatientSearchResults] = useState<Patient[]>([])
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
-  const [isPending, startTransition] = useTransition()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export default function MedicalRecordForm() {
+  const [patientSearchQuery, setPatientSearchQuery] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [userData, setUserData] = useState<Patient | null>(null);
+  const [medications, setMedications] = useState([
+    { name: "", dosage: "", quantity: 1, instructions: "" },
+  ]);
 
-  // Assuming the doctor is logged in with this ID
-  const doctorId = "doc123" // This would come from authentication in a real app
+  const handleMedicationChange = (
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
+    const updated = [...medications];
+    updated[index] = { ...updated[index], [field]: value };
+    setMedications(updated);
+  };
 
-//   const handlePatientSearch = async (e: React.FormEvent) => {
-//     e.preventDefault()
-//     if (!patientSearchQuery.trim()) return
+  const addMedication = () => {
+    setMedications([
+      ...medications,
+      { name: "", dosage: "", quantity: 1, instructions: "" },
+    ]);
+  };
 
-//     const formData = new FormData()
-//     formData.append("query", patientSearchQuery)
+  const removeMedication = (index: number) => {
+    const updated = [...medications];
+    updated.splice(index, 1);
+    setMedications(updated);
+  };
 
-//     startTransition(async () => {
-//       try {
-//         const result = await searchPatients(formData)
+  const doctorId = "67eea49d6e83009bf1955c0e";
 
-//         if (result.success && result.data) {
-//           setPatientSearchResults(result.data)
-//           if (result.data.length === 0) {
-//             toast({
-//               title: "No patients found",
-//               description: "Try a different search term",
-//               variant: "destructive",
-//             })
-//           }
-//         } else {
-//           toast({
-//             title: "Search failed",
-//             description: typeof result.error === "string" ? result.error : "Failed to search patients",
-//             variant: "destructive",
-//           })
-//         }
-//       } catch (error) {
-//         console.error("Error searching patients:", error)
-//         toast({
-//           title: "Search failed",
-//           description: "An unexpected error occurred",
-//           variant: "destructive",
-//         })
-//       }
-//     })
-//   }
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSearching(true);
 
-  const handlePatientSelect = (patient: Patient) => {
-    setSelectedPatient(patient)
-    setPatientSearchResults([])
-    setPatientSearchQuery("")
-  }
+    try {
+      const res = await axios.get("/api/get-user-profile", {
+        params: {
+          userId: "67eea49d6e83009bf1955c0d",
+          role: Role.PATIENT,
+        },
+      });
 
-//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault()
-//     if (!selectedPatient) {
-//       toast({
-//         title: "Patient required",
-//         description: "Please select a patient first",
-//         variant: "destructive",
-//       })
-//       return
-//     }
+      setUserData(res.data.user);
 
-//     setIsSubmitting(true)
+      toast.success("User Fetched Successfully");
+    } catch (err) {
+      console.error("Search error:", err);
+      toast.error(
+        "Something went wrong while fetching user details .. Check Id again"
+      );
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
-//     const formData = new FormData(e.currentTarget)
-//     formData.append("patientId", selectedPatient.id)
-//     formData.append("doctorId", doctorId)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!userData) {
+      toast.error("Please select a patient first");
+      return;
+    }
 
-//     try {
-//       const result = await createMedicalRecord(formData)
+    setIsSubmitting(true);
 
-//       if (result.success) {
-//         toast({
-//           title: "Medical record created",
-//           description: `Record created for patient ${selectedPatient.name}`,
-//         })
+    const form = new FormData(e.currentTarget);
 
-//         // Reset form
-//         e.currentTarget.reset()
-//         setSelectedPatient(null)
-//       } else {
-//         toast({
-//           title: "Failed to create record",
-//           description: typeof result.error === "string" ? result.error : "Please check the form for errors",
-//           variant: "destructive",
-//         })
-//       }
-//     } catch (error) {
-//       console.error("Error creating medical record:", error)
-//       toast({
-//         title: "Failed to create record",
-//         description: "An unexpected error occurred",
-//         variant: "destructive",
-//       })
-//     } finally {
-//       setIsSubmitting(false)
-//     }
-//   }
+    const payload = {
+      patientId: userData.id,
+      doctorId: doctorId,
+      diagnosis: form.get("diagnosis") as string,
+      prescription: form.get("prescription") as string,
+      specialInstructions: form.get("specialInstructions") as string,
+      notes: form.get("notes") as string,
+      medications: medications,
+    };
+
+    try {
+      await axios.post("/api/create-record", payload);
+
+      toast.success(`Record created for patient ${userData.name}`);
+
+      setUserData(null);
+    } catch (error) {
+      console.error("Error creating medical record:", error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Create Medical Record</CardTitle>
-        <CardDescription>Create a new medical record for a patient</CardDescription>
+        <CardDescription>
+          Create a new medical record for a patient
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -142,44 +141,37 @@ export function MedicalRecordForm() {
                   onChange={(e) => setPatientSearchQuery(e.target.value)}
                 />
               </div>
-              <Button type="submit" variant="outline" disabled={isPending}>
-                {isPending ? "Searching..." : "Search"}
+              <Button
+                type="submit"
+                variant="outline"
+                className="cursor-pointer"
+                onClick={handleSearch}
+                disabled={isSearching}
+              >
+                {isSearching ? "Searching..." : "Search"}
               </Button>
             </form>
-
-            {patientSearchResults.length > 0 && (
-              <div className="mt-2 border rounded-md overflow-hidden">
-                <ul className="divide-y">
-                  {patientSearchResults.map((patient) => (
-                    <li
-                      key={patient.id}
-                      className="p-2 hover:bg-gray-50 cursor-pointer"
-                      onClick={() => handlePatientSelect(patient)}
-                    >
-                      <div className="font-medium">{patient.name}</div>
-                      <div className="text-sm text-gray-500">ID: {patient.id}</div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
 
-          <form  className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     Patient ID
                   </label>
-                  <Input value={selectedPatient?.id || ""} readOnly className="mt-2" />
+                  <Input value={userData?.id || ""} readOnly className="mt-2" />
                 </div>
 
                 <div>
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     Patient Name
                   </label>
-                  <Input value={selectedPatient?.name || ""} readOnly className="mt-2" />
+                  <Input
+                    value={userData?.name || ""}
+                    readOnly
+                    className="mt-2"
+                  />
                 </div>
               </div>
 
@@ -188,38 +180,149 @@ export function MedicalRecordForm() {
                   Doctor ID
                 </label>
                 <Input value={doctorId} readOnly className="mt-2" />
-                <p className="text-sm text-muted-foreground mt-1">Your doctor ID is automatically filled in</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your doctor ID is automatically filled in
+                </p>
               </div>
 
               <div>
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Diagnosis
                 </label>
-                <Input name="diagnosis" placeholder="Enter diagnosis" required minLength={3} className="mt-2" />
+                <Input
+                  name="diagnosis"
+                  placeholder="Enter diagnosis"
+                  required
+                  minLength={3}
+                  className="mt-2"
+                />
               </div>
 
               <div>
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Prescription
                 </label>
-                <Input name="prescription" placeholder="Enter prescription" required minLength={3} className="mt-2" />
+                <Input
+                  name="prescription"
+                  placeholder="Enter prescription"
+                  required
+                  minLength={3}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium leading-none">
+                  Medications
+                </label>
+                <div className="space-y-4 mt-2">
+                  {medications.map((med, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
+                    >
+                      <Input
+                        placeholder="Name"
+                        value={med.name}
+                        onChange={(e) =>
+                          handleMedicationChange(index, "name", e.target.value)
+                        }
+                        required
+                      />
+                      <Input
+                        placeholder="Dosage (e.g., 500mg)"
+                        value={med.dosage}
+                        onChange={(e) =>
+                          handleMedicationChange(
+                            index,
+                            "dosage",
+                            e.target.value
+                          )
+                        }
+                        required
+                      />
+                      <Input
+                        type="number"
+                        placeholder="Quantity"
+                        value={med.quantity}
+                        onChange={(e) =>
+                          handleMedicationChange(
+                            index,
+                            "quantity",
+                            parseInt(e.target.value)
+                          )
+                        }
+                        required
+                        min={1}
+                      />
+                      <Input
+                        placeholder="Instructions (optional)"
+                        value={med.instructions}
+                        onChange={(e) =>
+                          handleMedicationChange(
+                            index,
+                            "instructions",
+                            e.target.value
+                          )
+                        }
+                      />
+                      {index > 0 && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          className="md:col-span-4 w-fit"
+                          onClick={() => removeMedication(index)}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    onClick={addMedication}
+                    variant="outline"
+                  >
+                    + Add Medication
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Special Instructions (If any)
+                </label>
+                <Textarea
+                  name="specialInstructions"
+                  placeholder="Enter any special instruction"
+                  rows={4}
+                  className="mt-2"
+                />
               </div>
 
               <div>
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Notes (Optional)
                 </label>
-                <Textarea name="notes" placeholder="Enter any additional notes" rows={4} className="mt-2" />
+                <Textarea
+                  name="notes"
+                  placeholder="Enter any additional notes"
+                  rows={4}
+                  className="mt-2"
+                />
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting || !selectedPatient}>
+            <Button
+              type="submit"
+              className="max-w-fit ml-auto cursor-pointer"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Creating Record..." : "Create Medical Record"}
             </Button>
           </form>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-

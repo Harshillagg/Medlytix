@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
       notes,
     } = body;
 
+    console.log("body : ", body)
+
     if (!patientId || !doctorId || !diagnosis || !prescription) {
       return ApiResponse(false, "All Fields are required", 404)
     }

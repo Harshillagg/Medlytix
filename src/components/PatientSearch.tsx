@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 import { format } from "date-fns";
 import RecordDetailsModal from "./RecordDetailsModal";
 
-type User = {
+type Patient = {
   id: string;
   name: string;
   email: string;
@@ -29,7 +29,7 @@ type User = {
 export function PatientSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [userData, setUserData] = useState<User | null>(null);
+  const [userData, setUserData] = useState<Patient | null>(null);
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(
     null
